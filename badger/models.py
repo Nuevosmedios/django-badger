@@ -835,14 +835,26 @@ class Award(models.Model):
         recipient_text = '%s%s' % (self.user.email, hash_salt)
         recipient_hash = ('sha256$%s' % hashlib.sha256(recipient_text)
                                                .hexdigest())
+        recipient_data = {}
+        recipient_data['type'] = 'email'
+        recipient_data['salt'] = hash_salt
+        recipient_data['hashed'] = True
+        recipient_data['identity'] = recipient_hash
+
+        verify_data = {}
+        verify_data['type'] = 'hosted'
+        verify_data['url'] = urljoin(base_url, self.get_absolute_url()) + '.json'
+
         assertion = {
-            "recipient": recipient_hash,
-            "salt": hash_salt,
+            "uid": str(self.pk),
+            "recipient": recipient_data,
+            "image": badge_data['image'],
             "evidence": urljoin(base_url, self.get_absolute_url()),
             # TODO: implement award expiration
             # "expires": self.expires.isoformat(),
             "issued_on": self.created.isoformat(),
-            "badge": badge_data
+            "badge": badge_data['criteria'] + '.json',
+            "verify": verify_data
         }
         return assertion
 
