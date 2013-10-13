@@ -674,17 +674,6 @@ class Badge(models.Model):
         else:
             base_url = 'http://%s' % (Site.objects.get_current().domain,)
 
-        # see: https://github.com/brianlovesdata/openbadges/wiki/Assertions
-        if not self.creator:
-            issuer = SITE_ISSUER
-        else:
-            issuer = {
-                # TODO: Get from user profile instead?
-                "origin": urljoin(base_url, self.creator.get_absolute_url()),
-                "name": self.creator.username,
-                "contact": self.creator.email
-            }
-
         data = {
             # The version of the spec/hub this manifest is compatible with. Use
             # "0.5.0" for the beta.
@@ -694,7 +683,7 @@ class Badge(models.Model):
             # TODO: truncate more intelligently
             "description": self.description[:128] or self.title[:128],
             "criteria": urljoin(base_url, self.get_absolute_url()),
-            "issuer": issuer
+            "issuer": urljoin(base_url, "badge/issuer.json")
         }
 
         image_url = self.image and self.image.url or DEFAULT_BADGE_IMAGE_URL
