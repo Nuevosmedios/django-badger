@@ -849,7 +849,7 @@ class Award(models.Model):
             "uid": str(self.pk),
             "recipient": recipient_data,
             "image": badge_data['image'],
-            "evidence": urljoin(base_url, self.get_absolute_url()),
+            "evidence": urljoin(base_url, self.get_absolute_url()) + '.json',
             # TODO: implement award expiration
             # "expires": self.expires.isoformat(),
             "issued_on": self.created.isoformat(),
