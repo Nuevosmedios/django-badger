@@ -841,7 +841,7 @@ class Award(models.Model):
             "evidence": urljoin(base_url, self.get_absolute_url()) + '.json',
             # TODO: implement award expiration
             # "expires": self.expires.isoformat(),
-            "issued_on": self.created.isoformat(),
+            "issuedOn": self.created.isoformat(),
             "badge": badge_data['criteria'] + '.json',
             "verify": verify_data
         }
