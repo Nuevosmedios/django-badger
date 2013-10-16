@@ -832,17 +832,17 @@ class Award(models.Model):
 
         verify_data = {}
         verify_data['type'] = 'hosted'
-        verify_data['url'] = urljoin(base_url, self.get_absolute_url()) + '.json'
+        verify_data['url'] = urljoin(base_url, self.get_absolute_url())
 
         assertion = {
             "uid": str(self.pk),
             "recipient": recipient_data,
             "image": badge_data['image'],
-            "evidence": urljoin(base_url, self.get_absolute_url()) + '.json',
+            "evidence": urljoin(base_url, self.get_absolute_url()),
             # TODO: implement award expiration
             # "expires": self.expires.isoformat(),
             "issuedOn": self.created.isoformat(),
-            "badge": badge_data['criteria'] + '.json',
+            "badge": badge_data['criteria'],
             "verify": verify_data
         }
         return assertion
