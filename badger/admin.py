@@ -123,16 +123,16 @@ class DeferredAwardAdmin(admin.ModelAdmin):
     raw_id_fields = ('creator',)
 
 
-def award_link(self):
-    url = reverse('admin:badger_award_change', args=[self.award.id])
-    return '<a href="%s">%s</a>' % (url, self.award)
+# def award_link(self):
+#     url = reverse('admin:badger_award_change', args=[self.award.id])
+#     return '<a href="%s">%s</a>' % (url, self.award)
 
-award_link.allow_tags = True
-award_link.short_description = 'award'
+# award_link.allow_tags = True
+# award_link.short_description = 'award'
 
 
 class NominationAdmin(admin.ModelAdmin):
-    list_display = ('id', show_unicode, award_link, 'accepted', 'nominee',
+    list_display = ('id', show_unicode, 'accepted', 'nominee',
                     'approver', 'creator', 'created', 'modified',)
     list_filter = ('accepted',)
     search_fields = ('badge__title', 'badge__slug', 'badge__description',)
