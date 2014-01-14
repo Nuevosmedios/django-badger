@@ -149,6 +149,15 @@ def detail(request, slug, format="html"):
         ), context_instance=RequestContext(request))
 
 
+def issuer(request):
+    data = getattr(settings, 'BADGER_SITE_ISSUER', {
+         "url": "http://mozilla.org",
+         "name": "Mozilla",
+     })                                                                               
+    resp = HttpResponse(simplejson.dumps(data))                                      
+    resp['Content-Type'] = 'application/json'                                        
+    return resp
+
 @require_http_methods(['GET', 'POST'])
 @login_required
 def create(request):

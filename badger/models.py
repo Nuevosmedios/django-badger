@@ -18,7 +18,6 @@ from django.db.models import signals, Q, Count, Max
 from django.db.models.fields.files import FieldFile, ImageFieldFile
 from django.core.mail import send_mail
 from django.core.exceptions import ValidationError
-from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
 from django.contrib.auth.models import User, AnonymousUser
 from django.contrib.sites.models import Site
@@ -28,6 +27,7 @@ from django.template import Context, TemplateDoesNotExist
 from django.template.loader import render_to_string
 
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.importlib import import_module
 
 try:
     import django.utils.simplejson as json
@@ -99,8 +99,29 @@ UPLOADS_ROOT = getattr(settings, 'BADGER_MEDIA_ROOT',
     os.path.join(getattr(settings, 'MEDIA_ROOT', 'media/'), 'uploads'))
 UPLOADS_URL = getattr(settings, 'BADGER_MEDIA_URL',
     urljoin(getattr(settings, 'MEDIA_URL', '/media/'), 'uploads/'))
-BADGE_UPLOADS_FS = FileSystemStorage(location=UPLOADS_ROOT,
-                                     base_url=UPLOADS_URL)
+
+# Copied from Django
+def get_storage_class(import_path=None):
+    if import_path is None:
+        import_path = settings.DEFAULT_FILE_STORAGE
+    try:
+        dot = import_path.rindex('.')
+    except ValueError:
+        raise ImproperlyConfigured("%s isn't a storage module." % import_path)
+    module, classname = import_path[:dot], import_path[dot+1:]
+    try:
+        mod = import_module(module)
+    except ImportError as e:
+        raise ImproperlyConfigured('Error importing storage module %s: "%s"' % (module, e))
+    try:
+        return getattr(mod, classname)
+    except AttributeError:
+        raise ImproperlyConfigured('Storage module "%s" does not define a "%s" class.' % (module, classname))
+
+BADGE_UPLOADS_STORAGE_CLASS = getattr(settings, 'BADGE_UPLOADS_STORAGE', 
+    'django.core.files.storage.FileSystemStorage')
+
+BADGE_UPLOADS_STORAGE = get_storage_class(BADGE_UPLOADS_STORAGE_CLASS)()
 
 DEFAULT_BADGE_IMAGE = getattr(settings, 'BADGER_DEFAULT_BADGE_IMAGE',
     "%s/fixtures/default-badge.png" % dirname(__file__))
@@ -407,7 +428,7 @@ class Badge(models.Model):
     description = models.TextField(blank=True,
         help_text='Longer description of the badge and its criteria')
     image = models.ImageField(blank=True, null=True,
-            storage=BADGE_UPLOADS_FS, upload_to=mk_upload_to('image', 'png'),
+            storage=BADGE_UPLOADS_STORAGE, upload_to=mk_upload_to('image', 'png'),
             help_text='Upload an image to represent the badge')
     prerequisites = models.ManyToManyField('self', symmetrical=False,
             blank=True, null=True,
@@ -653,17 +674,6 @@ class Badge(models.Model):
         else:
             base_url = 'http://%s' % (Site.objects.get_current().domain,)
 
-        # see: https://github.com/brianlovesdata/openbadges/wiki/Assertions
-        if not self.creator:
-            issuer = SITE_ISSUER
-        else:
-            issuer = {
-                # TODO: Get from user profile instead?
-                "origin": urljoin(base_url, self.creator.get_absolute_url()),
-                "name": self.creator.username,
-                "contact": self.creator.email
-            }
-
         data = {
             # The version of the spec/hub this manifest is compatible with. Use
             # "0.5.0" for the beta.
@@ -673,7 +683,7 @@ class Badge(models.Model):
             # TODO: truncate more intelligently
             "description": self.description[:128] or self.title[:128],
             "criteria": urljoin(base_url, self.get_absolute_url()),
-            "issuer": issuer
+            "issuer": urljoin(base_url, "badge/issuer.json")
         }
 
         image_url = self.image and self.image.url or DEFAULT_BADGE_IMAGE_URL
@@ -698,7 +708,7 @@ class Award(models.Model):
             help_text='Explanation and evidence for the badge award')
     badge = models.ForeignKey(Badge)
     image = models.ImageField(blank=True, null=True,
-                              storage=BADGE_UPLOADS_FS,
+                              storage=BADGE_UPLOADS_STORAGE,
                               upload_to=mk_upload_to('image', 'png'))
     claim_code = models.CharField(max_length=32, blank=True,
             default='', unique=False, db_index=True,
@@ -814,9 +824,20 @@ class Award(models.Model):
         recipient_text = '%s%s' % (self.user.email, hash_salt)
         recipient_hash = ('sha256$%s' % hashlib.sha256(recipient_text)
                                                .hexdigest())
+        recipient_data = {}
+        recipient_data['type'] = 'email'
+        recipient_data['salt'] = hash_salt
+        recipient_data['hashed'] = True
+        recipient_data['identity'] = recipient_hash
+
+        verify_data = {}
+        verify_data['type'] = 'hosted'
+        verify_data['url'] = urljoin(base_url, self.get_absolute_url())
+
         assertion = {
-            "recipient": recipient_hash,
-            "salt": hash_salt,
+            "uid": str(self.pk),
+            "recipient": recipient_data,
+            "image": badge_data['image'],
             "evidence": urljoin(base_url, self.get_absolute_url()),
             # TODO: implement award expiration
             # "expires": self.expires.date().isoformat(),
