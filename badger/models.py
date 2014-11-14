@@ -28,6 +28,7 @@ from django.template.loader import render_to_string
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.importlib import import_module
+from django.db import connection
 
 try:
     import django.utils.simplejson as json
@@ -130,7 +131,7 @@ DEFAULT_BADGE_IMAGE_URL = getattr(settings, 'BADGER_DEFAULT_BADGE_IMAGE_URL',
 
 TIME_ZONE_OFFSET = getattr(settings, "TIME_ZONE_OFFSET", timedelta(0))
 
-MK_UPLOAD_TMPL = '%(base)s/%(h1)s/%(h2)s/%(hash)s_%(field_fn)s_%(now)s_%(rand)04d.%(ext)s'
+MK_UPLOAD_TMPL = 'sites/%(schema_app)s/badges/%(base)s/%(h1)s/%(h2)s/%(hash)s_%(field_fn)s_%(now)s_%(rand)04d.%(ext)s'
 
 DEFAULT_HTTP_PROTOCOL = getattr(settings, "DEFAULT_HTTP_PROTOCOL", "http")
 
@@ -235,11 +236,13 @@ def mk_upload_to(field_fn, ext, tmpl=MK_UPLOAD_TMPL):
         base, slug = instance.get_upload_meta()
         slug_hash = (hashlib.md5(slug.encode('utf-8', 'ignore'))
                             .hexdigest())
+	tenant_name = connection.schema_name
+        schema_app = "%s" % tenant_name
         return tmpl % dict(now=int(time()), rand=random.randint(0, 1000),
                            slug=slug[:50], base=base, field_fn=field_fn,
                            pk=instance.pk,
                            hash=slug_hash, h1=slug_hash[0], h2=slug_hash[1],
-                           ext=ext)
+                           ext=ext, schema_app=schema_app)
     return upload_to
 
 
@@ -427,7 +430,7 @@ class Badge(models.Model):
         help_text='Very short name, for use in URLs and links')
     description = models.TextField(blank=True,
         help_text='Longer description of the badge and its criteria')
-    image = models.ImageField(blank=True, null=True,
+    image = models.ImageField(blank=True, null=True, max_length=256,
             storage=BADGE_UPLOADS_STORAGE, upload_to=mk_upload_to('image', 'png'),
             help_text='Upload an image to represent the badge')
     prerequisites = models.ManyToManyField('self', symmetrical=False,
@@ -708,7 +711,7 @@ class Award(models.Model):
             help_text='Explanation and evidence for the badge award')
     badge = models.ForeignKey(Badge)
     image = models.ImageField(blank=True, null=True,
-                              storage=BADGE_UPLOADS_STORAGE,
+                              storage=BADGE_UPLOADS_STORAGE, max_length=256,
                               upload_to=mk_upload_to('image', 'png'))
     claim_code = models.CharField(max_length=32, blank=True,
             default='', unique=False, db_index=True,
