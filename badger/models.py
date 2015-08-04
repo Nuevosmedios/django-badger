@@ -421,17 +421,21 @@ class BadgeManager(models.Manager, SearchManagerMixin):
 
 @_document_django_model
 class Badge(models.Model):
+    from django.db import connection
+    tenant_name = connection.schema_name
+
     """Representation of a badge"""
     objects = BadgeManager()
 
     title = models.CharField(max_length=255, blank=False, unique=True,
         help_text='Short, descriptive title')
-    slug = models.SlugField(blank=False, unique=True,
+    slug = models.SlugField(blank=False, unique=True,tenant_name = connection.schema_name
+
         help_text='Very short name, for use in URLs and links')
     description = models.TextField(blank=True,
         help_text='Longer description of the badge and its criteria')
     image = models.ImageField(blank=True, null=True, max_length=256,
-            storage=BADGE_UPLOADS_STORAGE, upload_to=mk_upload_to('image', 'png'),
+            storage=BADGE_UPLOADS_STORAGE, upload_to=os.path.join('media', 'sites', tenant_name, 'badge'),#mk_upload_to('image', 'png'),
             help_text='Upload an image to represent the badge')
     prerequisites = models.ManyToManyField('self', symmetrical=False,
             blank=True, null=True,
