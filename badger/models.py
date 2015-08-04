@@ -431,7 +431,7 @@ class Badge(models.Model):
     description = models.TextField(blank=True,
         help_text='Longer description of the badge and its criteria')
     image = models.ImageField(blank=True, null=True, max_length=256,
-            storage=BADGE_UPLOADS_STORAGE, upload_to=mk_upload_to('image', 'png'),
+            storage=BADGE_UPLOADS_STORAGE, upload_to=os.path.join("sites", PROJECT_NAME, 'badges'),#mk_upload_to('image', 'png'),
             help_text='Upload an image to represent the badge')
     prerequisites = models.ManyToManyField('self', symmetrical=False,
             blank=True, null=True,
