@@ -131,7 +131,8 @@ DEFAULT_BADGE_IMAGE_URL = getattr(settings, 'BADGER_DEFAULT_BADGE_IMAGE_URL',
 
 TIME_ZONE_OFFSET = getattr(settings, "TIME_ZONE_OFFSET", timedelta(0))
 
-MK_UPLOAD_TMPL = 'sites/%(schema_app)s/badges/%(base)s/%(h1)s/%(h2)s/%(hash)s_%(field_fn)s_%(now)s_%(rand)04d.%(ext)s'
+#MK_UPLOAD_TMPL = 'sites/%(schema_app)s/badges/%(base)s/%(h1)s/%(h2)s/%(hash)s_%(field_fn)s_%(now)s_%(rand)04d.%(ext)s'
+MK_UPLOAD_TMPL = '%(base)s/%(h1)s/%(h2)s/%(hash)s_%(field_fn)s_%(now)s_%(rand)04d.%(ext)s'
 
 DEFAULT_HTTP_PROTOCOL = getattr(settings, "DEFAULT_HTTP_PROTOCOL", "http")
 
@@ -433,7 +434,8 @@ class Badge(models.Model):
     description = models.TextField(blank=True,
         help_text='Longer description of the badge and its criteria')
     image = models.ImageField(blank=True, null=True, max_length=256,
-            storage=BADGE_UPLOADS_STORAGE, upload_to=os.path.join('media', 'sites', tenant_name, 'bagdes'),#mk_upload_to('image', 'png'),
+            #storage=BADGE_UPLOADS_STORAGE, 
+            upload_to=mk_upload_to('image', 'png'),
             help_text='Upload an image to represent the badge')
     prerequisites = models.ManyToManyField('self', symmetrical=False,
             blank=True, null=True,
