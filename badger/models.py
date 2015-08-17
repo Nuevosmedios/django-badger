@@ -766,8 +766,8 @@ class Award(models.Model):
 
         if is_new:
             # Bail if this is an attempt to double-award a unique badge
-            if self.badge.unique and self.badge.is_awarded_to(self.user):
-                raise BadgeAlreadyAwardedException()
+            #if self.badge.unique and self.badge.is_awarded_to(self.user):
+            #    raise BadgeAlreadyAwardedException()
 
             # Only fire will-be-awarded signal on a new award.
             badge_will_be_awarded.send(sender=self.__class__, award=self)
