@@ -30,6 +30,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.importlib import import_module
 from django.db import connection
 
+
 try:
     import django.utils.simplejson as json
 except ImportError: # Django 1.5 no longer bundles simplejson
@@ -494,11 +495,11 @@ class Badge(models.Model):
 
         super(Badge, self).save(**kwargs)
 
-        if notification:
-            if self.creator:
-                notification.send([self.creator], 'badge_edited',
-                                  dict(badge=self,
-                                       protocol=DEFAULT_HTTP_PROTOCOL))
+        #if notification:
+            #if self.creator:
+            #    notification.send([self.creator], 'badge_edited',
+            #                      dict(badge=self,
+            #                           protocol=DEFAULT_HTTP_PROTOCOL))
 
     def delete(self, **kwargs):
         """Make sure deletes cascade to awards"""
@@ -660,11 +661,11 @@ class Badge(models.Model):
         """Nominate a nominee for this badge on the nominator's behalf"""
         nomination = Nomination.objects.create(badge=self, creator=nominator,
                                          nominee=nominee)
-        if notification:
-            if self.creator:
-                notification.send([self.creator], 'nomination_submitted',
-                                  dict(nomination=nomination,
-                                       protocol=DEFAULT_HTTP_PROTOCOL))
+        #if notification:
+            #if self.creator:
+            #    notification.send([self.creator], 'nomination_submitted',
+            #                      dict(nomination=nomination,
+            #                           protocol=DEFAULT_HTTP_PROTOCOL))
 
         if self.nominations_autoapproved:
             nomination.approve_by(self.creator)
@@ -781,15 +782,15 @@ class Award(models.Model):
         if is_new:
             # Only fire was-awarded signal on a new award.
             badge_was_awarded.send(sender=self.__class__, award=self)
-
-            if notification:
-                if self.creator:
-                    notification.send([self.badge.creator], 'badge_awarded',
-                                      dict(award=self,
-                                           protocol=DEFAULT_HTTP_PROTOCOL))
-                notification.send([self.user], 'award_received',
-                                  dict(award=self,
-                                       protocol=DEFAULT_HTTP_PROTOCOL))
+            
+            #if notification:
+                #if self.creator:
+                #    notification.send([self.badge.creator], 'badge_awarded',
+                #                      dict(award=self,
+                #                           protocol=DEFAULT_HTTP_PROTOCOL))
+                #notification.send([self.user], 'award_received',
+                #                  dict(award=self,
+                #                       protocol=DEFAULT_HTTP_PROTOCOL))
 
             # Since this badge was just awarded, check the prerequisites on all
             # badges that count this as one.
@@ -1264,18 +1265,19 @@ class Nomination(models.Model):
         self.save()
         nomination_was_approved.send(sender=self.__class__,
                                      nomination=self)
-        if notification:
-            if self.badge.creator:
-                notification.send([self.badge.creator], 'nomination_approved',
-                                  dict(nomination=self,
-                                       protocol=DEFAULT_HTTP_PROTOCOL))
-            if self.creator:
-                notification.send([self.creator], 'nomination_approved',
-                                  dict(nomination=self,
-                                       protocol=DEFAULT_HTTP_PROTOCOL))
-            notification.send([self.nominee], 'nomination_received',
-                              dict(nomination=self,
-                                   protocol=DEFAULT_HTTP_PROTOCOL))
+        #if notification:
+            
+            #if self.badge.creator:
+            #    notification.send([self.badge.creator], 'nomination_approved',
+            #                      dict(nomination=self,
+            #                           protocol=DEFAULT_HTTP_PROTOCOL))
+            #if self.creator:
+            #    notification.send([self.creator], 'nomination_approved',
+            #                      dict(nomination=self,
+            #                           protocol=DEFAULT_HTTP_PROTOCOL))
+            #notification.send([self.nominee], 'nomination_received',
+            #                  dict(nomination=self,
+            #                       protocol=DEFAULT_HTTP_PROTOCOL))
 
         return self
 
@@ -1307,15 +1309,16 @@ class Nomination(models.Model):
         nomination_was_accepted.send(sender=self.__class__,
                                      nomination=self)
 
-        if notification:
-            if self.badge.creator:
-                notification.send([self.badge.creator], 'nomination_accepted',
-                                  dict(nomination=self,
-                                       protocol=DEFAULT_HTTP_PROTOCOL))
-            if self.creator:
-                notification.send([self.creator], 'nomination_accepted',
-                                  dict(nomination=self,
-                                       protocol=DEFAULT_HTTP_PROTOCOL))
+        #if notification:
+ 
+            #if self.badge.creator:
+            #    notification.send([self.badge.creator], 'nomination_accepted',
+            #                      dict(nomination=self,
+            #                           protocol=DEFAULT_HTTP_PROTOCOL))
+            #if self.creator:
+            #    notification.send([self.creator], 'nomination_accepted',
+            #                      dict(nomination=self,
+            #                           protocol=DEFAULT_HTTP_PROTOCOL))
 
         return self
 
@@ -1346,15 +1349,15 @@ class Nomination(models.Model):
         nomination_was_rejected.send(sender=self.__class__,
                                      nomination=self)
 
-        if notification:
-            if self.badge.creator:
-                notification.send([self.badge.creator], 'nomination_rejected',
-                                  dict(nomination=self,
-                                       protocol=DEFAULT_HTTP_PROTOCOL))
-            if self.creator:
-                notification.send([self.creator], 'nomination_rejected',
-                                  dict(nomination=self,
-                                       protocol=DEFAULT_HTTP_PROTOCOL))
+        #if notification:
+            #if self.badge.creator:
+            #    notification.send([self.badge.creator], 'nomination_rejected',
+            #                      dict(nomination=self,
+            #                           protocol=DEFAULT_HTTP_PROTOCOL))
+            #if self.creator:
+            #    notification.send([self.creator], 'nomination_rejected',
+            #                      dict(nomination=self,
+            #                           protocol=DEFAULT_HTTP_PROTOCOL))
 
         return self
 
