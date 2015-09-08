@@ -461,7 +461,7 @@ class Badge(models.Model):
     creator = models.ForeignKey(User, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True, blank=False)
     modified = models.DateTimeField(auto_now=True, blank=False)
-    group_badge = models.BooleanField(default=False, blank=True, null=True)
+    group_badge = models.NullBooleanField(default=False, blank=True, null=True)
 
     class Meta:
         unique_together = ('title', 'slug')
