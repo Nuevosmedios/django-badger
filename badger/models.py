@@ -462,6 +462,7 @@ class Badge(models.Model):
     created = models.DateTimeField(auto_now_add=True, blank=False)
     modified = models.DateTimeField(auto_now=True, blank=False)
     group_badge = models.NullBooleanField(default=False, blank=True, null=True)
+    weight = models.BooleanField(blank=True, null=True)
 
     class Meta:
         unique_together = ('title', 'slug')
