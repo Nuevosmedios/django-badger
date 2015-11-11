@@ -426,6 +426,11 @@ class Badge(models.Model):
     from django.db import connection
     tenant_name = connection.schema_name
     """Representation of a badge"""
+    BADGE_TYPE_CHOICES = (
+        ('AS', _('Assignment')),
+        ('APP', _('Application')),
+        ('AT', _('Automatic'))
+    ) 
     objects = BadgeManager()
 
     title = models.CharField(max_length=255, blank=False, unique=True,
@@ -463,7 +468,7 @@ class Badge(models.Model):
     modified = models.DateTimeField(auto_now=True, blank=False)
     group_badge = models.NullBooleanField(default=False, blank=True, null=True)
     weight = models.IntegerField(blank=True, null=True)
-
+    badgeType = models.CharField(max_length=3, choices=BADGE_TYPE_CHOICES, null=True, blank=True, default='')
     class Meta:
         unique_together = ('title', 'slug')
         ordering = ['-modified', '-created']
