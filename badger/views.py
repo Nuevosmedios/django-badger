@@ -1,4 +1,3 @@
-import logging
 import random
 
 from django.conf import settings
@@ -242,7 +241,10 @@ def award_badge(request, slug):
         form = BadgeAwardForm(request.POST, request.FILES)
         if form.is_valid():
             emails = form.cleaned_data['emails']
+            username = form.cleaned_data['username']
+            user = User.objects.get(username = username)
             description = form.cleaned_data['description']
+            result = badge.award_to(user, awarder=request.user, description=description)
             for email in emails:
                 result = badge.award_to(email=email, awarder=request.user,
                                         description=description)
@@ -557,3 +559,13 @@ def nominate_for(request, slug):
     return render_to_response('%s/badge_nominate_for.html' % bsettings.TEMPLATE_BASE,
                               dict(form=form, badge=badge,),
                               context_instance=RequestContext(request))
+
+@require_http_methods(['GET', 'POST'])
+@login_required
+def assignment(request):
+    """Create a new badge"""
+    return render_to_response('%s/badge_assignment.html' % bsettings.TEMPLATE_BASE, dict(
+                a = 1
+    ), context_instance=RequestContext(request))
+
+

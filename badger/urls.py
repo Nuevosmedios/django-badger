@@ -48,6 +48,7 @@ urlpatterns = patterns('badger.views',
 
     url(r'^create$', 'create',
         name='badger.create_badge'),
+
     url(r'^badge/(?P<slug>[^/]+)/nominate$', 'nominate_for',
         name='badger.nominate_for'),
     url(r'^badge/(?P<slug>[^/]+)/edit$', 'edit',
