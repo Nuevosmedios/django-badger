@@ -120,7 +120,9 @@ class MultiEmailField(MultipleItemsField):
 class BadgeAwardForm(MyForm):
     """Form to create either a real or deferred badge award"""
     # TODO: Needs a captcha?
+    username = CharField(label="username", required=False, help_text=_("User to award this badge"))
     emails = MultiEmailField(max_items=10,
+            required=False,
             help_text=_(u'Enter up to 10 email addresses for badge award '
                             'recipients'))
     description = CharField(
@@ -166,7 +168,7 @@ class BadgeEditForm(MyModelForm):
         except ImportError:
             pass
         fields += ('unique', 'nominations_accepted',
-                   'nominations_autoapproved',)
+                   'nominations_autoapproved','assignment_badge')
 
     required_css_class = "required"
     error_css_class = "error"

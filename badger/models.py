@@ -469,6 +469,8 @@ class Badge(models.Model):
     group_badge = models.NullBooleanField(default=False, blank=True, null=True)
     weight = models.IntegerField(blank=True, null=True)
     badgeType = models.CharField(max_length=3, choices=BADGE_TYPE_CHOICES, null=True, blank=True, default='')
+
+    assignment_badge = models.NullBooleanField(default=False, blank=True, null=True, help_text='This badge accept direct assignments?')
     class Meta:
         unique_together = ('title', 'slug')
         ordering = ['-modified', '-created']
