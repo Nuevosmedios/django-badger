@@ -232,20 +232,25 @@ def get_permissions_for(self, user):
     return perms
 
 
-def mk_upload_to(field_fn, ext, tmpl=MK_UPLOAD_TMPL):
+from django.utils.deconstruct import deconstructible
+@deconstructible
+class UploadTo(object):
     """upload_to builder for file upload fields"""
-    def upload_to(instance, filename):
+    def __init__(self, field_fn, ext, tmpl=MK_UPLOAD_TMPL):
+        self.field_fn = field_fn
+        self.ext = ext
+        self.tmpl = tmpl
+ 
+    def __call__(self, instance, filename):
         base, slug = instance.get_upload_meta()
         slug_hash = (hashlib.md5(slug.encode('utf-8', 'ignore'))
                             .hexdigest())
-	tenant_name = connection.schema_name
-        schema_app = "%s" % tenant_name
-        return tmpl % dict(now=int(time()), rand=random.randint(0, 1000),
-                           slug=slug[:50], base=base, field_fn=field_fn,
-                           pk=instance.pk,
-                           hash=slug_hash, h1=slug_hash[0], h2=slug_hash[1],
-                           ext=ext, schema_app=schema_app)
-    return upload_to
+        return self.tmpl % dict(now=int(time()), rand=random.randint(0, 1000),
+                            slug=slug[:50], base=base, field_fn=self.field_fn,
+                            pk=instance.pk,
+                            hash=slug_hash, h1=slug_hash[0], h2=slug_hash[1],
+                            ext=self.ext)
+
 
 
 class JSONField(models.TextField):
@@ -280,12 +285,6 @@ class JSONField(models.TextField):
         return smart_unicode(value)
 
 
-# Tell South that this field isn't all that special
-try:
-    from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ["^badger.models.JSONField"])
-except ImportError:
-    pass
 
 
 class SearchManagerMixin(object):
@@ -441,7 +440,7 @@ class Badge(models.Model):
         help_text='Longer description of the badge and its criteria')
     image = models.ImageField(blank=True, null=True, max_length=256,
             #storage=BADGE_UPLOADS_STORAGE, 
-            upload_to=mk_upload_to('image', 'png'),
+            upload_to=UploadTo('image', 'png'),
             help_text='Upload an image to represent the badge')
     prerequisites = models.ManyToManyField('self', symmetrical=False,
             blank=True, null=True,
@@ -469,7 +468,6 @@ class Badge(models.Model):
     group_badge = models.NullBooleanField(default=False, blank=True, null=True)
     weight = models.IntegerField(blank=True, null=True)
     badgeType = models.CharField(max_length=3, choices=BADGE_TYPE_CHOICES, null=True, blank=True, default='')
-
     assignment_badge = models.NullBooleanField(default=False, blank=True, null=True, help_text='This badge accept direct assignments?')
     class Meta:
         unique_together = ('title', 'slug')
@@ -726,7 +724,7 @@ class Award(models.Model):
     badge = models.ForeignKey(Badge)
     image = models.ImageField(blank=True, null=True,
                               storage=BADGE_UPLOADS_STORAGE, max_length=256,
-                              upload_to=mk_upload_to('image', 'png'))
+                              upload_to=UploadTo('image', 'png'))
     claim_code = models.CharField(max_length=32, blank=True,
             default='', unique=False, db_index=True,
             help_text='Code used to claim this award')

@@ -4,8 +4,8 @@ from django.conf import settings
 from django.shortcuts import  get_object_or_404
 from badger.models import Award, Badge
 
-
-from django.contrib.auth.models import SiteProfileNotAvailable
+#remove  in django1.7
+#from django.contrib.auth.models import SiteProfileNotAvailable
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 
