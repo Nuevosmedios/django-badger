@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import get_apps, get_models, signals
-from django.utils.importlib import import_module
+from importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
 import badger
@@ -46,7 +46,7 @@ if "notification" in settings.INSTALLED_APPS:
 
 
 def update_badges(overwrite=False):
-    from django.utils.importlib import import_module
+    from importlib import import_module
 
     for app in settings.INSTALLED_APPS:
         mod = import_module(app)

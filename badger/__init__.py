@@ -1,7 +1,7 @@
 import logging
 
 from django.conf import settings as django_settings
-from django.utils.importlib import import_module
+from importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
 from badger.models import Badge, Award, Progress
@@ -43,7 +43,7 @@ def autodiscover():
     Auto-discover INSTALLED_APPS badges.py modules and fail silently when
     not present.
     """
-    from django.utils.importlib import import_module
+    from importlib import import_module
     for app in django_settings.INSTALLED_APPS:
         mod = import_module(app)
         try:
