@@ -27,7 +27,8 @@ from django.template import Context, TemplateDoesNotExist
 from django.template.loader import render_to_string
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.utils.importlib import import_module
+#from django.utils.importlib import import_module
+from importlib import import_module
 from django.db import connection
 
 
