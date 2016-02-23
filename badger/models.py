@@ -27,7 +27,8 @@ from django.template import Context, TemplateDoesNotExist
 from django.template.loader import render_to_string
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.utils.importlib import import_module
+#from django.utils.importlib import import_module
+from importlib import import_module
 from django.db import connection
 
 
@@ -443,7 +444,7 @@ class Badge(models.Model):
             upload_to=UploadTo('image', 'png'),
             help_text='Upload an image to represent the badge')
     prerequisites = models.ManyToManyField('self', symmetrical=False,
-            blank=True, null=True,
+            blank=True,
             help_text=('When all of the selected badges have been awarded, this '
                        'badge will be automatically awarded.'))
     # TODO: Rename? Eventually we'll want a globally-unique badge. That is, one
