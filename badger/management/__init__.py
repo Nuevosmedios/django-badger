@@ -3,8 +3,8 @@ from os.path import dirname, basename
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models import get_apps, get_models, signals
-from django.utils.importlib import import_module
+from django.db.models import  signals
+from importlib import import_module
 from django.utils.module_loading import module_has_submodule
 
 import badger
@@ -42,7 +42,7 @@ if "notification" in settings.INSTALLED_APPS:
         for notice in notices:
             notification.create_notice_type(*notice)
 
-    signals.post_syncdb.connect(create_notice_types, sender=notification)
+    signals.post_migrate.connect(create_notice_types, sender=notification)
 
 
 def update_badges(overwrite=False):
@@ -63,5 +63,5 @@ def update_badges(overwrite=False):
                 raise
 
 
-signals.post_syncdb.connect(lambda *args, **kwargs: update_badges(),
+signals.post_migrate.connect(lambda *args, **kwargs: update_badges(),
                             sender=badger.models)
