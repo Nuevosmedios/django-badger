@@ -47,6 +47,8 @@ def user_avatar(user, secure=False, size=256, rating='pg', default=''):
     except AttributeError:
         pass
 
+    return settings.MEDIA_URL + "/images/default-avatar.png"
+    """
     base_url = (secure and 'https://secure.gravatar.com' or
         'http://www.gravatar.com')
     m = hashlib.md5(user.email)
@@ -55,7 +57,7 @@ def user_avatar(user, secure=False, size=256, rating='pg', default=''):
         params=urllib.urlencode(dict(
             s=size, d=default, r=rating
         ))
-    )
+    )"""
 
 
 @register.simple_tag
