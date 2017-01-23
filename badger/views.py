@@ -242,10 +242,14 @@ def award_badge(request, slug):
         if form.is_valid():
             emails = form.cleaned_data['emails']
             username = form.cleaned_data['username']
-            user = User.objects.get(username = username)
-            description = form.cleaned_data['description']
-            result = badge.award_to(user, awarder=request.user, description=description)
-            for email in emails:
+	    description = form.cleaned_data['description']
+            if username:
+		try:
+		    user = User.objects.get(username = username)
+		    result = badge.award_to(user, awarder=request.user, description=description)
+            	except:
+		    pass
+	    for email in emails:
                 result = badge.award_to(email=email, awarder=request.user,
                                         description=description)
                 if result:
