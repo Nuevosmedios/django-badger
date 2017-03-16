@@ -12,7 +12,15 @@ except ImportError:
     from django.core.urlresolvers import reverse
 
 from .models import (Badge, Award, Nomination, Progress, DeferredAward)
-
+send_badge_notification_data = None
+config_file = None
+try:
+    from notifications.views import send_badge_notification
+    send_badge_notification_data = send_badge_notification
+    from constance import config
+    config_file = config
+except ImportError:
+    pass
 
 UPLOADS_URL = getattr(settings, 'BADGER_MEDIA_URL',
     urljoin(getattr(settings, 'MEDIA_URL', '/media/'), 'uploads/'))
@@ -98,7 +106,28 @@ class AwardAdmin(admin.ModelAdmin):
     search_fields = ("badge__title", "badge__slug", "badge__description",
                      "description")
     raw_id_fields = ('user', 'creator',)
-
+    """
+        @brief: Overload of save badge function to add notification
+                Se sobrecarga la funcion de guardado del modelo para poder enviar la notificacion
+        @author: Carolina Samaca
+        @date: 16-03-2017
+        @version: 0.1
+        @history: 0.1 C.S creating function
+    """
+    def save_model(self, request, obj, form, change):
+        obj.save()
+        if config_file and config_file.ENABLE_NOTIFICATIONS_MODULE:
+            list_emails = []
+            email = ""
+            from_user = config_file.CONTACT_EMAIL
+            try:
+                email = obj.user.email
+            except:
+                email = ""
+            if email:
+                list_emails.append(email)
+            if email and from_user:
+                send_badge_notification_data('award', obj.badge, from_user, list_emails, obj.user)
 
 class ProgressAdmin(admin.ModelAdmin):
     raw_id_fields = ('user',)
