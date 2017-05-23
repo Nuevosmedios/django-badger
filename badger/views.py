@@ -18,10 +18,10 @@ try:
 except ImportError:
     from django.core.urlresolvers import reverse
 
-try:
-    from tower import ugettext_lazy as _
-except ImportError:
-    from django.utils.translation import ugettext_lazy as _
+#try:
+#    from tower import ugettext_lazy as _
+#except ImportError:
+from django.utils.translation import ugettext_lazy as _
 
 from django.views.generic.list import ListView
 from django.views.decorators.http import (require_GET, require_POST,
@@ -248,17 +248,17 @@ def award_badge(request, slug):
 		    user = User.objects.get(username = username)
 		    result = badge.award_to(user, awarder=request.user, description=description)
             	except:
-		    pass
+                    messages.info(request, _("El usuario no existe: %(user)s" % {"user": username}))
 	    for email in emails:
                 result = badge.award_to(email=email, awarder=request.user,
                                         description=description)
                 if result:
                     if not hasattr(result, 'claim_code'):
-                        messages.info(request, _(u'Award issued to {email}').format(
+                        messages.info(request, _(u'Insignia asignada a {email}').format(
                             email=email))
                     else:
                         messages.info(request, _(
-                            u'Invitation to claim award sent to {email}').format(email=email))
+                            u'Invitacion para reclamar insignia enviada a {email}').format(email=email))
             return HttpResponseRedirect(reverse('badger.views.detail',
                                                 args=(badge.slug,)))
 
