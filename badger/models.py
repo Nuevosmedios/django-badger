@@ -471,6 +471,7 @@ class Badge(models.Model):
     badgeType = models.CharField(max_length=3, choices=BADGE_TYPE_CHOICES, null=True, blank=True, default='')
 
     assignment_badge = models.NullBooleanField(default=False, blank=True, null=True, help_text='This badge accept direct assignments?')
+    hidden = models.BooleanField(default=False)
     class Meta:
         unique_together = ('title', 'slug')
         ordering = ['-modified', '-created']
