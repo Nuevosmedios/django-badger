@@ -737,6 +737,7 @@ class Award(models.Model):
     hidden = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True, blank=False)
     modified = models.DateTimeField(auto_now=True, blank=False)
+    show_badge = models.BooleanField(default=True)
 
     get_permissions_for = get_permissions_for
 
