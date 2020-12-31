@@ -29,7 +29,8 @@ from django.template.loader import render_to_string
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.importlib import import_module
 from django.db import connection
-
+from os.path import basename
+from os.path import join
 
 try:
     import django.utils.simplejson as json
@@ -245,6 +246,14 @@ def mk_upload_to(field_fn, ext, tmpl=MK_UPLOAD_TMPL):
                            pk=instance.pk,
                            hash=slug_hash, h1=slug_hash[0], h2=slug_hash[1],
                            ext=ext, schema_app=schema_app)
+    return upload_to
+
+def evidence_nomination_upload_to():    
+    """upload_to builder for file upload fields"""
+    def upload_to(instance, filename):     
+        tenant_name = connection.schema_name
+        
+        return join( 'sites', tenant_name, 'evidences_nomination_user', filename)
     return upload_to
 
 
@@ -1202,6 +1211,7 @@ class Nomination(models.Model):
     award = models.ForeignKey(Award, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True, blank=False)
     modified = models.DateTimeField(auto_now=True, blank=False)
+    reason_nomination = models.TextField(blank=True, null=True)
 
     get_permissions_for = get_permissions_for
 
@@ -1372,6 +1382,9 @@ class Nomination(models.Model):
 
         return self
 
+class NominationEvidences(models.Model):
+    nomination = models.ForeignKey(Nomination,blank=False, null=False)
+    file_evidence = models.FileField(upload_to=evidence_nomination_upload_to,  null=True, blank=True, verbose_name = 'Archivo')
 
 # HACK: Django 1.2 is missing receiver and user_logged_in
 if receiver and user_logged_in:
