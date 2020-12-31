@@ -30,6 +30,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.importlib import import_module
 from django.db import connection
 from os.path import basename
+from os.path import join
 
 try:
     import django.utils.simplejson as json
@@ -247,21 +248,12 @@ def mk_upload_to(field_fn, ext, tmpl=MK_UPLOAD_TMPL):
                            ext=ext, schema_app=schema_app)
     return upload_to
 
-def evidence_nomination_upload_to(field_fn, tmpl=MK_UPLOAD_TMPL):    
+def evidence_nomination_upload_to():    
     """upload_to builder for file upload fields"""
-    def upload_to(instance, filename):
-        based = basename(filename)
-        ext = based.rsplit(".", 1)[-1].lower()
-        base, slug = instance.get_upload_meta()
-        slug_hash = (hashlib.md5(slug.encode('utf-8', 'ignore'))
-                            .hexdigest())
-	tenant_name = connection.schema_name
-        schema_app = "%s" % tenant_name
-        return tmpl % dict(now=int(time()), rand=random.randint(0, 1000),
-                           slug=slug[:50], base=base, field_fn=field_fn,
-                           pk=instance.pk,
-                           hash=slug_hash, h1=slug_hash[0], h2=slug_hash[1],
-                           ext=ext, schema_app=schema_app)
+    def upload_to(instance, filename):     
+        tenant_name = connection.schema_name
+        
+        return join( 'sites', tenant_name, 'evidences_nomination_user', filename)
     return upload_to
 
 
@@ -1392,7 +1384,7 @@ class Nomination(models.Model):
 
 class NominationEvidences(models.Model):
     nomination = models.ForeignKey(Nomination,blank=False, null=False)
-    file_evidence = models.FileField(upload_to=evidence_nomination_upload_to("file"),  null=True, blank=True, verbose_name = 'Archivo')
+    file_evidence = models.FileField(upload_to=evidence_nomination_upload_to,  null=True, blank=True, verbose_name = 'Archivo')
 
 # HACK: Django 1.2 is missing receiver and user_logged_in
 if receiver and user_logged_in:
