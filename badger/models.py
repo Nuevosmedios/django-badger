@@ -248,13 +248,11 @@ def mk_upload_to(field_fn, ext, tmpl=MK_UPLOAD_TMPL):
                            ext=ext, schema_app=schema_app)
     return upload_to
 
-def evidence_nomination_upload_to():    
+def evidence_nomination_upload_to(instance, filename):    
     """upload_to builder for file upload fields"""
-    def upload_to(instance, filename):     
-        tenant_name = connection.schema_name
-        
-        return join( 'sites', tenant_name, 'evidences_nomination_user', filename)
-    return upload_to
+    tenant_name = connection.schema_name
+    return join( 'sites', tenant_name, 'evidences_nomination_user', filename)
+    
 
 
 class JSONField(models.TextField):
